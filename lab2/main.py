@@ -34,6 +34,27 @@ def mean(distr, size):
 def median(distr, size):
     return numpy.median(distr)
 
+def estimate_mean(mean, variance):
+    sup = list(str(mean + variance))
+    inf = list(str(mean - variance))
+    digit = 0
+
+    if sup[0] != '-':
+        sup.insert(0, '+')
+    if inf[0] != '-':
+        inf.insert(0, '+')
+    if sup.index('.') != inf.index('.') or sup[0] != inf[0]:
+        return str(round((mean),4)) + '$\pm$' + str(round((variance),4))
+    else:
+        while sup[digit] == inf[digit]:
+            digit = digit + 1
+
+        if digit <= sup.index('.'):
+            for i in range(digit, sup.index('.')):
+                sup[i] = '0'
+            digit = sup.index('.')
+            return ''.join(sup[:digit])
+
 
 if __name__ == "__main__":
 
@@ -75,6 +96,8 @@ if __name__ == "__main__":
                 distribution = characteristics[i][j][k]
                 expectedChrctrs[i][j].append(numpy.mean(distribution))
                 varianceChrctrs[i][j].append(numpy.std(distribution) ** 2)
+		estimateChrctrs[i][j].append(estimate_mean(numpy.mean(distribution), numpy.std(distribution)))
+
 
     for i in range(len(names)):
         with open(names[i] + ".tex", 'w') as file:
@@ -93,4 +116,11 @@ if __name__ == "__main__":
                     file.write("&" + str(round(varianceChrctrs[j][i][k], 5)))
                 file.write(r"\\")
                 file.write("\hline")
-                file.write(" & & & & & " + r"\\" + "\hline ")
+                file.write("$\hat{E}(z)$")
+                for k in range(len(functions)):
+                    if i == 3:
+                        file.write("&--")
+                    else:
+                        file.write("&" + str(estimateChrctrs[j][i][k]))
+                file.write(r"\\")
+                file.write("\hline ")
